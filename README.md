@@ -92,8 +92,8 @@ class AgentState(TypedDict):
 
 | Node | What It Does | Updates in State | Next Node |
 |------|-------------|-----------------|-----------|
-| `agent` | Calls the LLM with full conversation history; LLM decides whether to invoke a tool or reply directly | `messages` (appends LLM response with optional tool_calls) | `tools` / `END` |
-| `tools` | Executes the tool chosen by the LLM — search, details, booking, or human handover — and appends the result as a ToolMessage | `messages (appends ToolMessage), needs_human, human_handover_reason` | 'agent' or 'END' |
+| `agent` | Calls the LLM with full conversation history; LLM decides whether to invoke a tool or reply directly | `messages (appends LLM response with optional tool_calls)` | `tools` / `END` |
+| `tools` | Executes the tool chosen by the LLM — search, details, booking, or human handover — and appends the result as a ToolMessage | `messages (appends ToolMessage), needs_human, human_handover_reason` | `agent` or `END` |
 ---
 
 ## 1.5 Tool Definitions
@@ -268,7 +268,9 @@ stayease
 ├── agent
 │   ├── graph.py
 │   ├── __init__.py
+│   ├── llm.py
 │   ├── nodes.py
+│   ├── prompt.py
 │   ├── state.py
 │   └── tools.py
 ├── api.md
