@@ -83,7 +83,7 @@ flowchart TD
 ```python
 class AgentState(TypedDict):
     messages: Annotated[list, add_messages]  # Stores full conversation history; add_messages reducer appends each turn without replacing previous ones
-    needs_human: NotRequired[bool]           # Signals FastAPI to notify the support team when escalate_to_human tool is called
+    is_human_needed: NotRequired[bool]           # Signals FastAPI to notify the support team when escalate_to_human tool is called
     human_handover_reason: NotRequired[str]  # Captures the reason for escalation so the support team knows context before taking over
 ---
 ```
