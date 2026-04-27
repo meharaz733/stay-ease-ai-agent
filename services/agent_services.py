@@ -31,7 +31,7 @@ async def create_booking_into_db(
     listing_id: str,
     reference: str,
     guest_name: str,
-    guest_mail: str,
+    guest_email: str,
     guest_phone: str,
     check_in: str,
     check_out: str,

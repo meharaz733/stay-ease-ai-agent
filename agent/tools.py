@@ -69,7 +69,7 @@ async def get_listing_details(listing_id: str) -> dict:
 async def create_booking(
     listing_id: str,
     guest_name: str,
-    guest_mail: str,
+    guest_email: str,
     guest_phone: str,
     check_in: str,
     check_out: str,
@@ -84,7 +84,7 @@ async def create_booking(
         listing_id,
         reference,
         guest_name,
-        guest_mail,
+        guest_email,
         guest_phone,
         check_in,
         check_out,

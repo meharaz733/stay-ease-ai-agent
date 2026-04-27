@@ -297,7 +297,7 @@ Update the agent state directly.
 | `listing_id` | `UUID(FK → listings.id)` |
 | `reference` | `VARCHAR(20)` |
 | `guest_name` | `VARCHAR(255)` |
-| `guest_mail` | `VARCHAR(255)` |
+| `guest_email` | `VARCHAR(255)` |
 | `guest_phone` | `VARCHAR(20)` |
 | `check_in` | `DATE` |
 | `check_out` | `DATE` |
