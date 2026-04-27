@@ -312,7 +312,7 @@ Update the agent state directly.
 | `conversation_id` | `UUID(PK)` |
 | `guest_phone` | `VARCHAR(20)` |
 | `guest_email` | `VARCHAR(255)` |
-| `is_needs_human` | `BOOLEAN`  |
+| `is_human_needed` | `BOOLEAN`  |
 | `human_handover_reason` | `TEXT` |
 | `created_at` | `TIMESTAMPTZ` |
 | `updated_at` | `TIMESTAMPTZ` |
