@@ -16,9 +16,11 @@ flowchart TD
 
     subgraph AGENT["Agent"]
         C[START]
+        CC["Guardrails (Input Validation)"]
         D[Agent\nLLM + tool binding]
         E[tools]
         F[human_handover]
+        S["Guardrails (Output Validation)"]
         G[END]
     end
 
@@ -26,12 +28,13 @@ flowchart TD
         H[(listings + bookings)]
         I[(conversations)]
     end
-
     Z([Guest Reply])
     A([Guest Message]) --> B
     B -->|Pass guest message to Agent| C
+    C -->|Validate input before pass to LLM| CC
     B -->|Store guest message in database| I
-    C --> D
+    CC -->|Valid Input| D
+    CC -->|Invalid Input| G
     D -.->|Tool calls based on guest query| E
     E -.->|Tool result pass to Agent| D
     E -.->|When Agent Faild to reply| F
@@ -43,7 +46,8 @@ flowchart TD
     E -->|create_booking| H
 
     G --> Z
-    D -.->|Direct Reply| G
+    D -.->|Direct Reply| S
+    S -->|Valid Output| G
     Z -->|Store Agent reply in database| I
     Z -->|Response to guest| B
 
