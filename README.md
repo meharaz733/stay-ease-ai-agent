@@ -5,7 +5,11 @@ A LangGraph-powered conversational AI agent for StayEase — a short-term accomm
 ---
 
 ## 1.1 System Overview
-The system exposes a FastAPI backend that receives guest messages over HTTP. Each message is passed to a LangGraph agent, which uses a Groq-hosted LLM (LLaMA 3.3 70B) to understand guest intent and invoke the appropriate tool — search, details, or book. If the guest asks about anything outside these three capabilities, the agent escalates to a human support agent through a dedicated human handover tool. Conversation state is persisted using a PostgreSQL-backed LangGraph checkpointer, ensuring full context retention across sessions.
+The system exposes a FastAPI backend that receives guest messages over HTTP. Each message is processed by a LangGraph agent, which includes both input and output guardrails. The input guardrails validate user input before passing it to the LLM, helping to prevent prompt injection and adversarial attacks. The output guardrails validate the LLM’s responses to improve accuracy and ensure compliance with privacy policies.
+
+The agent uses a Groq-hosted LLM (LLaMA 3.3 70B) to understand guest intent and invoke the appropriate tool—search, details, or booking. If a guest requests anything outside these three capabilities, the agent escalates the query to a human support agent via a dedicated handover tool.
+
+Conversation state is persisted using a PostgreSQL-backed LangGraph checkpointer, ensuring full context retention across sessions.
 
 ```mermaid
 flowchart TD
@@ -97,8 +101,11 @@ class InputState(TypedDict):
                This typically includes the latest user query and any prior context
                passed from the client. Messages are incrementally appended using
                the `add_messages` reducer during graph execution.
+            
+    fallback_msg : It will use if the agent failed to ans the user query. 
     """
     messages: Annotated[List[BaseMessage], add_messages]
+    fallback_msg: str
 
 
 class AgentState(InputState, total=False):
@@ -115,6 +122,10 @@ class AgentState(InputState, total=False):
     messages : Full conversation history including user, assistant, and tool messages.
                Automatically accumulated via the `add_messages` reducer.
 
+    fallback_msg : Fallback message will use as guest reply when the agent failed to ans.
+
+    is_input_valid : Boolean flag indicating whether the input is valid or not.
+
     is_human_needed : Boolean flag indicating whether the agent is unable to
                       confidently handle the request and requires human intervention.
                       Defaults to False if not set.
@@ -124,7 +135,7 @@ class AgentState(InputState, total=False):
                             request, system limitation, or policy restriction).
                             Should only be set when `is_human_needed` is True.
     """
-
+    is_input_valid: bool
     is_human_needed: bool
     human_handover_reason: str
 
@@ -147,15 +158,19 @@ class OutputState(AgentState):
     modifying the internal agent state structure.
     """
     pass
----
+
 ```
+---
 
 ## 1.4 Node Design
 
 | Node | What It Does | Updates in State | Next Node |
 |------|-------------|-----------------|-----------|
+| `Guardial (Input)` | The input guardrails validate user input before passing it to the LLM, helping to prevent prompt injection and adversarial attacks. | `is_input_valid` | `agent` / `END` |
 | `agent` | Calls the LLM with full conversation history; LLM decides whether to invoke a tool or reply directly | `messages (appends LLM response with optional tool_calls)` | `tools` / `END` |
-| `tools` | Executes the tool chosen by the LLM — search, details, booking, or human handover — and appends the result as a ToolMessage | `messages (appends ToolMessage), needs_human, human_handover_reason` | `agent` or `END` |
+| `tools` | Executes the tool chosen by the LLM — search, details, booking, or human handover — and appends the result as a ToolMessage | `messages (appends ToolMessage), needs_human, human_handover_reason` | `agent` / `END` |
+| `Guardial (Output)` | The output guardrails validate the LLM’s responses to improve accuracy and ensure compliance with privacy policies. Update `fallback_msg` with new response generate by `output guardial` node. | `fallback_msg` | `END` |
+
 ---
 
 ## 1.5 Tool Definitions
