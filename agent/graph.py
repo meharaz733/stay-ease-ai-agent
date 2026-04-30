@@ -5,7 +5,7 @@ from langgraph.graph import END, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import tools_condition
 
-from agent.nodes import agent_node, human_handover_condition, tool_node, input_guardial, output_guardial, input_guardial_check
+from agent.nodes import agent_node, human_handover_condition, tool_node, input_guardrail, output_guardrail, input_guardrail_check
 from agent.state import AgentState, InputState, OutputState
 
 
@@ -49,15 +49,15 @@ async def build_graph() -> CompiledStateGraph:
         output_schema=OutputState,
     )
 
-    workflow.add_node("input_guardial", input_guardial)
+    workflow.add_node("input_guardial", input_guardrail)
     workflow.add_node("agent", agent_node)
     workflow.add_node("tools", tool_node)
-    workflow.add_node("outputt_guardial", output_guardial)
+    workflow.add_node("outputt_guardial", output_guardrail)
 
     # TODO add adge for output guardial 
 
     workflow.set_entry_point("input_guardial")
-    workflow.add_conditional_edges("input_guardial", input_guardial_check, {"end": END, "agent": "agent"},)
+    workflow.add_conditional_edges("input_guardial", input_guardrail_check, {"end": END, "agent": "agent"},)
     workflow.add_conditional_edges("agent", tools_condition)
     workflow.add_conditional_edges(
         "tools",

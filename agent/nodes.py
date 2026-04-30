@@ -8,7 +8,7 @@ from agent.tools import TOOLS
 
 model_with_tools = llm.bind_tools(TOOLS)
 
-async def input_guardial(state: AgentState):# -> AgentState:
+async def input_guardrail(state: AgentState):# -> AgentState:
     """
     The input guardrails validate user input before passing it to the LLM, helping to prevent prompt injection and adversarial attacks.
 
@@ -58,7 +58,7 @@ async def agent_node(state: AgentState) -> AgentState:
 
 tool_node = ToolNode(TOOLS)
 
-async def output_guardial(state: AgentState):# -> AgentState:
+async def output_guardrail(state: AgentState):# -> AgentState:
     """
     The output guardrails validate the LLM’s responses to improve accuracy and ensure compliance with privacy policies. Update `fallback_msg` with new response generate by `output guardial` node.
 
@@ -88,7 +88,7 @@ def human_handover_condition(state: AgentState) -> str:
         return "end"
     return "agent"
 
-def input_guardial_check(state: AgentState)->str:
+def input_guardrail_check(state: AgentState)->str:
     if state.get("is_input_valid"):
         return "agent"
     return "end"

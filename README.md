@@ -166,10 +166,10 @@ class OutputState(AgentState):
 
 | Node | What It Does | Updates in State | Next Node |
 |------|-------------|-----------------|-----------|
-| `Guardial (Input)` | The input guardrails validate user input before passing it to the LLM, helping to prevent prompt injection and adversarial attacks. | `is_input_valid` | `agent` / `END` |
+| `Guardrail (Input)` | The input guardrails validate user input before passing it to the LLM, helping to prevent prompt injection and adversarial attacks. | `is_input_valid` | `agent` / `END` |
 | `agent` | Calls the LLM with full conversation history; LLM decides whether to invoke a tool or reply directly | `messages (appends LLM response with optional tool_calls)` | `tools` / `END` |
 | `tools` | Executes the tool chosen by the LLM — search, details, booking, or human handover — and appends the result as a ToolMessage | `messages (appends ToolMessage), needs_human, human_handover_reason` | `agent` / `END` |
-| `Guardial (Output)` | The output guardrails validate the LLM’s responses to improve accuracy and ensure compliance with privacy policies. Update `fallback_msg` with new response generate by `output guardial` node. | `fallback_msg` | `END` |
+| `Guardrail (Output)` | The output guardrails validate the LLM’s responses to improve accuracy and ensure compliance with privacy policies. Update `fallback_msg` with new response generate by `output guardrail` node. | `fallback_msg` | `END` |
 
 ---
 
