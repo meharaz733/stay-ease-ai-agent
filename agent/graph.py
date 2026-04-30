@@ -5,7 +5,7 @@ from langgraph.graph import END, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import tools_condition
 
-from agent.nodes import agent_node, human_handover_condition, tool_node
+from agent.nodes import agent_node, human_handover_condition, tool_node, input_guardial, output_guardial, input_guardial_check
 from agent.state import AgentState, InputState, OutputState
 
 
@@ -26,13 +26,16 @@ async def build_graph() -> CompiledStateGraph:
     Graph topology
     --------------
     START
-      └─► agent_node                                  (LLM decides action)
-            ├─► tool_node                             (if tool call requested)
-            │     ├─► search_available_properties ──► agent   (results passed back to LLM)
-            │     ├─► get_listing_details         ──► agent   (results passed back to LLM)
-            │     ├─► create_booking              ──► agent   (results passed back to LLM)
-            │     └─► human_handover              ──► END     (escalation, no further LLM call)
-            └─► END                                    (if LLM replied directly)
+    └─► input_guardial                         (validate input to prevent prompt injection and adversarial attacks)
+    └─► agent_node                             (LLM decides action)
+            ├─► tool_node                      (if tool call requested)
+                  ├─► search_available_properties ──► agent   (results passed back to LLM)
+                  ├─► get_listing_details         ──► agent   (results passed back to LLM)
+                  ├─► create_booking              ──► agent   (results passed back to LLM)
+                  └─► human_handover              ──► END     (escalation, no further LLM call)
+    └─► output_guardial                        (validate LLM's response)
+    └─► END                                    (if LLM replied directly)
+            
 
     Returns
     -------
@@ -46,10 +49,15 @@ async def build_graph() -> CompiledStateGraph:
         output_schema=OutputState,
     )
 
+    workflow.add_node("input_guardial", input_guardial)
     workflow.add_node("agent", agent_node)
     workflow.add_node("tools", tool_node)
+    workflow.add_node("outputt_guardial", output_guardial)
 
-    workflow.set_entry_point("agent")
+    # TODO add adge for output guardial 
+
+    workflow.set_entry_point("input_guardial")
+    workflow.add_conditional_edges("input_guardial", input_guardial_check, {"end": END, "agent": "agent"},)
     workflow.add_conditional_edges("agent", tools_condition)
     workflow.add_conditional_edges(
         "tools",

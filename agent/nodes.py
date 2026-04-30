@@ -8,6 +8,24 @@ from agent.tools import TOOLS
 
 model_with_tools = llm.bind_tools(TOOLS)
 
+async def input_guardial(state: AgentState):# -> AgentState:
+    """
+    The input guardrails validate user input before passing it to the LLM, helping to prevent prompt injection and adversarial attacks.
+
+    Parameters
+    ----------
+    state : AgentState
+        The current graph state containing the full conversation history and
+        any optional control flags.
+
+    Returns
+    -------
+    AgentState
+        A partial state update containing:
+        - is_input_valid: set True if input is valid else set False.
+
+    """
+    pass
 
 async def agent_node(state: AgentState) -> AgentState:
     """
@@ -40,6 +58,26 @@ async def agent_node(state: AgentState) -> AgentState:
 
 tool_node = ToolNode(TOOLS)
 
+async def output_guardial(state: AgentState):# -> AgentState:
+    """
+    The output guardrails validate the LLM’s responses to improve accuracy and ensure compliance with privacy policies. Update `fallback_msg` with new response generate by `output guardial` node.
+
+    Parameters
+    ----------
+    state : AgentState
+        The current graph state containing the full conversation history and
+        any optional control flags.
+
+    Returns
+    -------
+    AgentState
+        A partial state update containing:
+        - fallback_msg: set a new response generate by this node.
+
+    """
+    pass
+
+
 
 def human_handover_condition(state: AgentState) -> str:
     """After tool_node: route to human handover or back to agent"""
@@ -49,3 +87,8 @@ def human_handover_condition(state: AgentState) -> str:
     if is_human_needed:
         return "end"
     return "agent"
+
+def input_guardial_check(state: AgentState)->str:
+    if state.get("is_input_valid"):
+        return "agent"
+    return "end"
